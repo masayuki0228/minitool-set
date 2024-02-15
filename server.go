@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io"
+	"fmt"
 	"log"
 	"net"
 	"time"
@@ -13,7 +13,7 @@ func receiveTCPConn(ln *net.TCPListener) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		conn, err := ln.AcceptTCP()
+		conn, err := ln.AcceptTCP() // ここで次の着信を待ち、新しいコネクションを返すため、一回止まる。
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -24,11 +24,15 @@ func receiveTCPConn(ln *net.TCPListener) {
 func echoHandler(conn *net.TCPConn) {
 	defer conn.Close()
 	for {
-		_, err := io.WriteString(conn, "Socket Connection!!\n")
+		b := make([]byte, 2048)
+		i, err := conn.Read(b)
 		if err != nil {
-			return
+			log.Println(333, err)
 		}
-		time.Sleep(time.Second)
+		if i != 0 {
+			fmt.Println(string(b))
+		}
+		time.Sleep(time.Second * 10)
 	}
 }
 
