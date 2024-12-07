@@ -2,42 +2,33 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
-	"strings"
+	"github.com/atotto/clipboard"
+	"time"
 )
 
-var loremWords = []string{
-	"lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing", "elit",
-	"sed", "do", "eiusmod", "tempor", "incididunt", "ut", "labore", "et", "dolore",
-	"magna", "aliqua", "ut", "enim", "ad", "minim", "veniam", "quis", "nostrud",
-	"exercitation", "ullamco", "laboris", "nisi", "ut", "aliquip", "ex", "ea", "commodo",
-	"consequat",
-}
+func main() {
+	fmt.Println("クリップボード監視を開始します。Ctrl+Cで終了します。")
 
-func generateLoremIpsum(sentences int) string {
-	var loremText []string
+	var lastClipboardContent string
 
-	for i := 0; i < sentences; i++ {
-		// ランダムな単語数の文を作成
-		wordCount := rand.Intn(15) + 5 // 5～20単語の文
-		var sentence []string
-
-		for j := 0; j < wordCount; j++ {
-			word := loremWords[rand.Intn(len(loremWords))]
-			sentence = append(sentence, word)
+	for {
+		// クリップボードの内容を取得
+		content, err := clipboard.ReadAll()
+		if err != nil {
+			fmt.Println("クリップボードの読み取りに失敗しました:", err)
+			time.Sleep(1 * time.Second) // エラー時に少し待つ
+			continue
 		}
 
-		// 文の最初を大文字にし、末尾にピリオドを追加
-		sentence[0] = strings.Title(sentence[0])
-		loremText = append(loremText, strings.Join(sentence, " ")+".")
+		// 前回と内容が異なれば表示
+		if content != lastClipboardContent {
+			lastClipboardContent = content
+			fmt.Println("新しいクリップボード内容:", content)
+			fmt.Println("文字数:", len(content))
+			fmt.Println()
+		}
+
+		// 短い間隔でチェック
+		time.Sleep(500 * time.Millisecond)
 	}
-
-	return strings.Join(loremText, " ")
-}
-
-func main() {
-	// 3つの文で構成されたLorem Ipsumを生成
-	lorem := generateLoremIpsum(3)
-	fmt.Println("---")
-	fmt.Println(lorem)
 }
